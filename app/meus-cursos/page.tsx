@@ -14,7 +14,6 @@ interface Curso {
 
 export default function MeusCursosPage() {
   const router = useRouter();
-
   const [loading, setLoading] = useState(true);
 const [cursos, setCursos] = useState<Curso[]>([]);
 const [nome, setNome] = useState("Olá");
@@ -26,27 +25,37 @@ const [produto, setProduto] = useState("");
 
   async function carregarCursos() {
  
-  const params = new URLSearchParams(window.location.search);
-  
-  const slug = params.get("slug");
+  const slug = new URLSearchParams(window.location.search).get("slug");
 
-  
-  if (!slug) {
-    window.location.href = "https://www.magiaoriente.com.br";
-    return;
-  }
+if (!slug) {
+  setLoading(false);
+  return;
+}
 
+if (!slug) {
+  window.location.href = "https://www.magiaoriente.com.br";
+  return;
+}
 
   // Primeiro tenta localizar um assinante
 let nomeUsuario = "";
 let emailUsuario = "";
 let clubClientId: string |null = null;
 
-const { data: cliente } = await supabase
+const { data: cliente, error } = await supabase
   .from("club_clients")
-  .select("id,nome,email,produto")
+  .select("*")
   .eq("slug", slug)
   .maybeSingle();
+
+console.log(cliente);
+console.log(error);
+
+console.log("SLUG:", slug);
+console.log("CLIENTE:", cliente);
+console.log("ERRO CLIENTE:", erroCliente);
+
+
 
 if (cliente) {
   setProduto(cliente.produto ?? "");
@@ -88,6 +97,7 @@ const { data: alunos, error: erroAlunos } = await supabase
   .select("*")
   .or(filtro);
 
+  
 console.log("CLIENTE:", cliente);
 console.log("ALUNOS:", alunos);
 console.log("ERRO ALUNOS:", erroAlunos);
@@ -97,6 +107,16 @@ if (!alunos || alunos.length === 0) {
   setLoading(false);
   return;
 }
+
+console.log({
+  slug,
+  cliente,
+  clubClientId,
+  emailUsuario,
+  filtro,
+  alunos,
+  cursos,
+});
 
   const ids = alunos
   .map((item) => item.course_id)
