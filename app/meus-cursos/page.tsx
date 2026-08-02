@@ -65,24 +65,21 @@ if (cursosData) {
 } else {
 
   // Se não encontrou, tenta localizar um aluno externo
-  const { data: cliente, error } = await supabase
-  .from("club_clients")
-  .select("id,nome,email,produto")
+const { data: aluno } = await supabase
+  .from("course_students")
+  .select("id,nome,email")
   .eq("slug", slug)
   .maybeSingle();
 
-console.log("SLUG:", slug);
-console.log("CLIENTE:", cliente);
-console.log("ERRO:", error);
+console.log("ALUNO:", aluno);
 
-  if (!aluno) {
-    setLoading(false);
-    return;
-  }
-
-  nomeUsuario = aluno.nome;
-  emailUsuario = aluno.email;
+if (!aluno) {
+  setLoading(false);
+  return;
 }
+
+nomeUsuario = aluno.nome;
+emailUsuario = aluno.email;
 
 const primeiroNome = nomeUsuario.split(" ")[0];
 
@@ -96,19 +93,19 @@ setNome(
   ? `club_client_id.eq.${clubClientId},email.eq.${emailUsuario}`
   : `email.eq.${emailUsuario}`;
 
-const { data: alunos, error: erroAlunos } = await supabase
+const { data: cursosData, error: erroCursos } = await supabase
   .from("course_students")
   .select("*")
   .or(filtro);
 
 
 
-if (!alunos || alunos.length === 0) {
+if (!cursosData || cursosData.length === 0) {
   setCursos([]);
   setLoading(false);
   return;
 }
-  const ids = alunos
+  const ids = cursosData
   .map((item) => item.course_id)
   .filter(Boolean);
 
@@ -121,7 +118,7 @@ if (error) {
   console.error(error);
 }
 
-setCursos(cursos || []);
+setCursos(cursosData || []);
 setLoading(false);
 }
 
