@@ -98,7 +98,7 @@ const { data: alunos, error: erroAlunos } = await supabase
   .or(filtro);
 
   
-console.log("CURSOS:", cursos);
+console.log("CURSOS:", cursosData);
 console.log("ALUNOS:", alunos);
 console.log("ERRO ALUNOS:", erroAlunos);
 
@@ -110,12 +110,12 @@ if (!alunos || alunos.length === 0) {
 
 console.log({
   slug,
-  cursos,
+  cursos: cursosData,
   clubClientId,
   emailUsuario,
   filtro,
   alunos,
-  cursos,
+  cursos: cursosData,
 });
 
   const ids = alunos
