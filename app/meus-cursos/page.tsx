@@ -42,26 +42,26 @@ let nomeUsuario = "";
 let emailUsuario = "";
 let clubClientId: string |null = null;
 
-const { data: cursos, error: erroCursos } = await supabase
+const { data: cursosData, error: erroCursos } = await supabase
   .from("club_clients")
   .select("*")
   .eq("slug", slug)
   .maybeSingle();
 
-console.log(cursos);
+console.log(cursosData);
 console.log(erroCursos);
 
 console.log("SLUG:", slug);
-console.log("CURSOS:", cursos);
+console.log("CURSOS:", cursosData);
 console.log("ERRO CURSOS:", erroCursos);
 
 
 
-if (cursos) {
-  setProduto(cursos.produto ?? "");
-  nomeUsuario = cursos.nome;
-  emailUsuario = cursos.email;
-  clubClientId = cursos.id;
+if (cursosData) {
+  setProduto(cursosData.produto ?? "");
+  nomeUsuario = cursosData.nome;
+  emailUsuario = cursosData.email;
+  clubClientId = cursosData.id;
 } else {
 
   // Se não encontrou, tenta localizar um aluno externo
