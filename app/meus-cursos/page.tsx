@@ -97,27 +97,13 @@ const { data: alunos, error: erroAlunos } = await supabase
   .select("*")
   .or(filtro);
 
-  
-console.log("CURSOS:", cursosData);
-console.log("ALUNOS:", alunos);
-console.log("ERRO ALUNOS:", erroAlunos);
+
 
 if (!alunos || alunos.length === 0) {
   setCursos([]);
   setLoading(false);
   return;
 }
-
-console.log({
-  slug,
-  cliente,
-  clubClientId,
-  emailUsuario,
-  filtro,
-  alunos,
-  cursosData,
-});
-
   const ids = alunos
   .map((item) => item.course_id)
   .filter(Boolean);
