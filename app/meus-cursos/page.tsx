@@ -24,102 +24,83 @@ const [produto, setProduto] = useState("");
   }, []);
 
   async function carregarCursos() {
- 
   const slug = new URLSearchParams(window.location.search).get("slug");
 
-if (!slug) {
-  setLoading(false);
-  return;
-}
+  if (!slug) {
+    setLoading(false);
+    return;
+  }
 
-if (!slug) {
-  window.location.href = "https://www.magiaoriente.com.br";
-  return;
-}
+  let nomeUsuario = "";
+  let emailUsuario = "";
+  let clubClientId: string | null = null;
 
-  // Primeiro tenta localizar um assinante
-let nomeUsuario = "";
-let emailUsuario = "";
-let clubClientId: string |null = null;
+  // Procura primeiro no Clube do Tarô
+  const { data: cliente } = await supabase
+    .from("club_clients")
+    .select("id,nome,email,produto")
+    .eq("slug", slug)
+    .maybeSingle();
 
-const { data: cursosData, error: erroCursos } = await supabase
-  .from("club_clients")
-  .select("*")
-  .eq("slug", slug)
-  .maybeSingle();
+  if (cliente) {
+    setProduto(cliente.produto ?? "");
+    nomeUsuario = cliente.nome;
+    emailUsuario = cliente.email;
+    clubClientId = cliente.id;
+  } else {
+    // Se não encontrar, procura aluno externo
+    const { data: aluno } = await supabase
+      .from("course_students")
+      .select("id,nome,email")
+      .eq("slug", slug)
+      .maybeSingle();
 
-console.log(cursosData);
-console.log(erroCursos);
+    if (!aluno) {
+      setLoading(false);
+      return;
+    }
 
-console.log("SLUG:", slug);
-console.log("CURSOS:", cursosData);
-console.log("ERRO CURSOS:", erroCursos);
+    nomeUsuario = aluno.nome;
+    emailUsuario = aluno.email;
+  }
 
+  const primeiroNome = nomeUsuario.split(" ")[0];
 
-
-if (cursosData) {
-  setProduto(cursosData.produto ?? "");
-  nomeUsuario = cursosData.nome;
-  emailUsuario = cursosData.email;
-  clubClientId = cursosData.id;
-} else {
-
-  // Se não encontrou, tenta localizar um aluno externo
-const { data: aluno } = await supabase
-  .from("course_students")
-  .select("id,nome,email")
-  .eq("slug", slug)
-  .maybeSingle();
-
-console.log("ALUNO:", aluno);
-
-if (!aluno) {
-  setLoading(false);
-  return;
-}
-
-nomeUsuario = aluno.nome;
-emailUsuario = aluno.email;
-
-const primeiroNome = nomeUsuario.split(" ")[0];
-
-setNome(
-  primeiroNome.charAt(0).toUpperCase() +
-  primeiroNome.slice(1).toLowerCase()
-
-);
+  setNome(
+    primeiroNome.charAt(0).toUpperCase() +
+      primeiroNome.slice(1).toLowerCase()
+  );
 
   const filtro = clubClientId
-  ? `club_client_id.eq.${clubClientId},email.eq.${emailUsuario}`
-  : `email.eq.${emailUsuario}`;
+    ? `club_client_id.eq.${clubClientId},email.eq.${emailUsuario}`
+    : `email.eq.${emailUsuario}`;
 
-const { data: cursosData, error: erroCursos } = await supabase
-  .from("course_students")
-  .select("*")
-  .or(filtro);
+  const { data: alunos } = await supabase
+    .from("course_students")
+    .select("*")
+    .or(filtro);
 
+  if (!alunos || alunos.length === 0) {
+    setCursos([]);
+    setLoading(false);
+    return;
+  }
 
+  const ids = alunos
+    .map((item) => item.course_id)
+    .filter(Boolean);
 
-if (!cursosData || cursosData.length === 0) {
-  setCursos([]);
+  const { data: cursosData, error: erroCursos } = await supabase
+    .from("courses")
+    .select("*")
+    .in("id", ids);
+
+  if (erroCursos) {
+    console.error(erroCursos);
+  }
+
+  setCursos(cursosData || []);
   setLoading(false);
-  return;
-}
-  const ids = cursosData
-  .map((item) => item.course_id)
-  .filter(Boolean);
-
-const { data: cursos, error } = await supabase
-  .from("courses")
-  .select("*")
-  .in("id", ids);
-
-if (error) {
-  console.error(error);
-}
-
-setCursos(cursosData || []);
-setLoading(false);
 }
 
  function voltarPortal() {
