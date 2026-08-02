@@ -110,12 +110,12 @@ if (!alunos || alunos.length === 0) {
 
 console.log({
   slug,
-  cursos: cursosData,
+  cliente,
   clubClientId,
   emailUsuario,
   filtro,
   alunos,
-  cursos: cursosData,
+  cursosData,
 });
 
   const ids = alunos
