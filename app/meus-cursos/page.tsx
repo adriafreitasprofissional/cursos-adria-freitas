@@ -65,11 +65,15 @@ if (cursosData) {
 } else {
 
   // Se não encontrou, tenta localizar um aluno externo
-  const { data: aluno } = await supabase
-    .from("course_students")
-    .select("id,nome,email")
-    .eq("slug", slug)
-    .maybeSingle();
+  const { data: cliente, error } = await supabase
+  .from("club_clients")
+  .select("id,nome,email,produto")
+  .eq("slug", slug)
+  .maybeSingle();
+
+console.log("SLUG:", slug);
+console.log("CLIENTE:", cliente);
+console.log("ERRO:", error);
 
   if (!aluno) {
     setLoading(false);
